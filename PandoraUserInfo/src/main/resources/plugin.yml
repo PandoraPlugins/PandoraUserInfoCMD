@@ -1,0 +1,12 @@
+name: PandoraUserInfo
+version: ${project.version}
+main: me.nanigans.pandorauserinfo.PandoraUserInfo
+authors: [ProNanigans]
+description: User information for pandora pvp
+website: www.dustie.xyz
+depends: [LiteBans, Vault, Factions]
+commands:
+  userinfo:
+    description: "Shows information on a user"
+    usage: /userinfo <name>
+    aliases: [whois, infouser, ui]
