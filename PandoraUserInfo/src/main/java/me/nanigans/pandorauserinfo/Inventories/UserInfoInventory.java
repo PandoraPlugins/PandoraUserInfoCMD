@@ -23,6 +23,8 @@ public class UserInfoInventory implements Listener {
     private boolean isSwapping = false;
     private ItemStack lastClicked;
     private short punishmentPage = 1;
+    private UserInfoActions.Filter filterBy = UserInfoActions.Filter.NONE;
+
 
     public UserInfoInventory(Player looking, OfflinePlayer whosInfo){
 
@@ -94,6 +96,15 @@ public class UserInfoInventory implements Listener {
         isSwapping = false;
     }
 
+
+
+    public UserInfoActions.Filter getFilterBy() {
+        return filterBy;
+    }
+
+    public void setFilterBy(UserInfoActions.Filter filterBy) {
+        this.filterBy = filterBy;
+    }
     public short getPunishmentPage() {
         return punishmentPage;
     }

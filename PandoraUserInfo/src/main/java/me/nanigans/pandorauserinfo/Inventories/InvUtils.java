@@ -29,14 +29,14 @@ public class InvUtils {
         put(22, createItem(Material.PAPER, "Balance", "CMD:bal {player}"));
         put(23, createItem(Material.ENCHANTMENT_TABLE, "Faction Vault", "METHOD:toFacVault"));
         put(24, createItem(Material.CHEST, "Player Vault", "METHOD:toPlayerVault"));
-        put(29, createItem(Material.BOOKSHELF, "Warnings", "METHOD:getWarnings"));
-        put(30, createItem(Material.BOOK, "Mutes"));
+        put(29, createItem(Material.BOOKSHELF, "Warnings", "METHOD:getWarnings", "SQLTABLE:warnings"));
+        put(30, createItem(Material.BOOK, "Mutes", "METHOD:getMutes", "SQLTABLE:mutes"));
         put(31, createItem(Material.PAPER, "Reports"));
-        put(32, createItem(Material.BOOK, "Bans"));
-        put(33, createItem(Material.BOOKSHELF, "Active Punishments"));
+        put(32, createItem(Material.BOOK, "Bans", "METHOD:getBans", "SQLTABLE:bans"));
+        put(33, createItem(Material.BOOKSHELF, "Kicks", "METHOD:getKicks"));
         put(39, createItem(Material.BED, "Homes"));
-        put(40, createItem(Material.EYE_OF_ENDER, "Faction Warps"));
-        put(41, createItem(Material.BED, "Factions Home"));
+        put(40, createItem(Material.EYE_OF_ENDER, "Faction Warps", "METHOD:getFacWarps"));
+        put(41, createItem(Material.BED, "Factions Home", "METHOD:getFacHomes"));
     }};
 
     /**
@@ -53,71 +53,82 @@ public class InvUtils {
             String punishData = ItemUtils.getNBT(itemInfo, "DATA");
             if(punishData != null) {
 
-                Map<String, Object> data = Arrays.stream(punishData.split(", "))
-                        .map(s -> s.replaceFirst("\\{", "").replace("}", "").split("="))
+                Map<String, Object> data = Arrays.stream(punishData.split(","))
+                        .map(s -> s.replaceFirst("\\{", "").replace("}", "").trim().split("="))
                         .collect(Collectors.toMap(
                                 a -> a[0],  //key
                                 a -> a[1]   //value
                         ));
 
                 Inventory inv = Bukkit.createInventory(info.getStaff(), 54, info.getUser().getName() + " " + data.get("type"));
-                ItemStack head = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
-                SkullMeta headMeta = ((SkullMeta) head.getItemMeta());
-                headMeta.setOwner(info.getUser().getName());
-                headMeta.setDisplayName(info.getUser().getName());
-                headMeta.setLore(ItemUtils.wordWrapLore(info.getUser().getUniqueId().toString(), "-", ChatColor.GRAY));
-                head.setItemMeta(headMeta);
-                inv.setItem(22, head);
 
-                ItemStack ID = new ItemStack(Material.DOUBLE_PLANT);
-                ItemMeta meta = ID.getItemMeta();
-                meta.setDisplayName("Warn ID: " + data.get("id"));
-                ID.setItemMeta(meta);
-                inv.setItem(0, ID);
+                if(data.size() > 2) {
+                    ItemStack head = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
+                    SkullMeta headMeta = ((SkullMeta) head.getItemMeta());
+                    headMeta.setOwner(info.getUser().getName());
+                    headMeta.setDisplayName(info.getUser().getName());
+                    headMeta.setLore(ItemUtils.wordWrapLore(info.getUser().getUniqueId().toString(), "-", ChatColor.GRAY));
+                    head.setItemMeta(headMeta);
+                    inv.setItem(22, head);
 
-                ItemStack isActive = new ItemStack(Material.STAINED_GLASS_PANE, 1,
-                        (short) (Boolean.parseBoolean(data.get("active").toString()) ? 13 : 14));
-                if(Boolean.parseBoolean(data.get("active").toString()))
-                    meta.setDisplayName(ChatColor.GREEN+"Active");
-                else meta.setDisplayName(ChatColor.RED+"Inactive");
-                isActive.setItemMeta(meta);
-                inv.setItem(4, isActive);
+                    ItemStack ID = new ItemStack(Material.DOUBLE_PLANT);
+                    ItemMeta meta = ID.getItemMeta();
+                    meta.setDisplayName(data.get("type").toString().replace("s", "") + " ID: " + data.get("id"));
+                    ID.setItemMeta(meta);
+                    inv.setItem(0, ID);
 
-                ItemStack reason = new ItemStack(Material.PAPER);
-                meta.setDisplayName("Reason");
-                meta.setLore(ItemUtils.wordWrapLore(data.get("reason").toString(), " ", ChatColor.GOLD));
-                reason.setItemMeta(meta);
-                inv.setItem(20, reason);
+                    ItemStack isActive = new ItemStack(Material.STAINED_GLASS_PANE, 1,
+                            (short) (Boolean.parseBoolean(data.get("active").toString()) ? 13 : 14));
+                    if (Boolean.parseBoolean(data.get("active").toString()))
+                        meta.setDisplayName(ChatColor.GREEN + "Active");
+                    else meta.setDisplayName(ChatColor.RED + "Inactive");
+                    isActive.setItemMeta(meta);
+                    inv.setItem(4, isActive);
 
-                head = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
-                headMeta = ((SkullMeta) head.getItemMeta());
-                headMeta.setOwner(data.get("punishedByUUID").toString());
-                headMeta.setDisplayName("Reported By: " + ChatColor.GOLD +
-                        Bukkit.getOfflinePlayer(UUID.fromString(data.get("punishedByUUID").toString())).getName());
-                headMeta.setLore(ItemUtils.wordWrapLore(data.get("punishedByUUID").toString(), "-", ChatColor.GRAY));
+                    ItemStack reason = new ItemStack(Material.PAPER);
+                    meta.setDisplayName("Reason");
+                    meta.setLore(ItemUtils.wordWrapLore(data.get("reason").toString(), " ", ChatColor.GOLD));
+                    reason.setItemMeta(meta);
+                    inv.setItem(20, reason);
 
-                head.setItemMeta(headMeta);
-                inv.setItem(40, head);
+                    ItemStack rHead = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
+                    SkullMeta rHeadItemMeta = ((SkullMeta) rHead.getItemMeta());
+                    rHeadItemMeta.setOwner(Bukkit.getOfflinePlayer(UUID.fromString(data.get("punishedByUUID").toString())).getName());
+                    rHeadItemMeta.setDisplayName("Given By: " + ChatColor.GOLD +
+                            Bukkit.getOfflinePlayer(UUID.fromString(data.get("punishedByUUID").toString())).getName());
+                    rHeadItemMeta.setLore(ItemUtils.wordWrapLore(data.get("punishedByUUID").toString(), "-", ChatColor.GRAY));
 
-                ItemStack time = new ItemStack(Material.WATCH, 1);
-                meta.setDisplayName("Time Given");
-                String[] times = ItemUtils.getDateAndTime(Long.parseLong(data.get("timePunished").toString()));
-                meta.setLore(Arrays.asList("Date: " + times[0], "Time: " + times[1]));
+                    rHead.setItemMeta(rHeadItemMeta);
+                    inv.setItem(40, rHead);
 
-                time.setItemMeta(meta);
-                inv.setItem(24, time);
+                    ItemStack time = new ItemStack(Material.WATCH, 1);
+                    meta.setDisplayName("Time Given");
+                    String[] times = ItemUtils.getDateAndTime(Long.parseLong(data.get("timePunished").toString()));
+                    if(times[0].contains("1969")) {
+                        times[0] = "None";
+                        times[1] = "None";
+                    }
+                        meta.setLore(Arrays.asList("Date: " + times[0], "Time: " + times[1]));
 
-                ItemStack expir = new ItemStack(Material.WATCH, 1);
-                meta.setDisplayName("Expires");
+                    time.setItemMeta(meta);
+                    inv.setItem(24, time);
 
-                times = ItemUtils.getDateAndTime(Long.parseLong(data.get("expires").toString()));
-                meta.setLore(Arrays.asList("Date: " + times[0], "Time: " + times[1]));
+                    ItemStack expir = new ItemStack(Material.WATCH, 1);
+                    meta.setDisplayName("Expires");
 
-                expir.setItemMeta(meta);
-                inv.setItem(33, expir);
+                    times = ItemUtils.getDateAndTime(Long.parseLong(data.get("expires").toString()));
+                    if(times[0].contains("1969")) {
+                        times[0] = "None";
+                        times[1] = "None";
+                    }
+                    meta.setLore(Arrays.asList("Date: " + times[0], "Time: " + times[1]));
 
-                ItemStack back = createItem(Material.BARRIER, ChatColor.RED+"Back", "METHOD:"+data.get("method"));
-                inv.setItem(45, back);
+                    expir.setItemMeta(meta);
+                    inv.setItem(33, expir);
+
+                    ItemStack back = createItem(Material.BARRIER, ChatColor.RED + "Back", "METHOD:" + data.get("method"));
+                    inv.setItem(45, back);
+                }
 
                 return inv;
             }
@@ -216,7 +227,7 @@ public class InvUtils {
         item.setItemMeta(meta);
         for (String s : nbt) {
             String[] pair = s.split(":");
-            item = ItemUtils.setNBT(item, pair[0], pair[1]);
+            item = ItemUtils.setNBT(item, pair[0], s.substring(pair[0].length()+1));
         }
 
         return item;
