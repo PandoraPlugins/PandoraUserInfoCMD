@@ -3,6 +3,7 @@ package me.nanigans.pandorauserinfo.Inventories;
 import com.earth2me.essentials.Essentials;
 import com.earth2me.essentials.User;
 import me.nanigans.pandorauserinfo.PandoraUserInfo;
+import net.milkbowl.vault.Vault;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -28,13 +29,13 @@ public class InvUtils {
         put(21, createItem(Material.ENDER_CHEST, "Ender Chest", "METHOD:openEChest"));
         put(22, createItem(Material.PAPER, "Balance", "CMD:bal {player}"));
         put(23, createItem(Material.ENCHANTMENT_TABLE, "Faction Vault", "METHOD:toFacVault"));
-        put(24, createItem(Material.CHEST, "Player Vault", "METHOD:toPlayerVault"));
+        put(24, createItem(Material.CHEST, "Player Vault", "METHOD:getPlayerVault"));
         put(29, createItem(Material.BOOKSHELF, "Warnings", "METHOD:getWarnings", "SQLTABLE:warnings"));
         put(30, createItem(Material.BOOK, "Mutes", "METHOD:getMutes", "SQLTABLE:mutes"));
-        put(31, createItem(Material.PAPER, "Reports"));
+        put(31, createItem(Material.PAPER, "Reports", "METHOD:getReports"));
         put(32, createItem(Material.BOOK, "Bans", "METHOD:getBans", "SQLTABLE:bans"));
         put(33, createItem(Material.BOOKSHELF, "Kicks", "METHOD:getKicks"));
-        put(39, createItem(Material.BED, "Homes"));
+        put(39, createItem(Material.BED, "Homes", "METHOD:getHomes"));
         put(40, createItem(Material.EYE_OF_ENDER, "Faction Warps", "METHOD:getFacWarps"));
         put(41, createItem(Material.BED, "Factions Home", "METHOD:getFacHomes"));
     }};
@@ -138,6 +139,11 @@ public class InvUtils {
     }
 
 
+    /**
+     * Generates the first inventory the staff member sees
+     * @param info The userinfo information
+     * @return a new inventory
+     */
     public static Inventory genInfoPage(UserInfoInventory info){
 
         Inventory inv = Bukkit.createInventory(info.getStaff(), 54, info.getUser().getName()+" user information");
@@ -189,6 +195,12 @@ public class InvUtils {
     }
 
 
+    /**
+     * Creates a confirmation inventory
+     * @param info user info
+     * @param invName the inventory name
+     * @return a new inventory
+     */
     public static Inventory genConfirmInventory(UserInfoInventory info, String invName){
 
         Inventory inv = Bukkit.createInventory(info.getStaff(), 9, invName);
@@ -202,6 +214,12 @@ public class InvUtils {
         return inv;
     }
 
+    /**
+     * Sets lore for itemstack
+     * @param lore lore list
+     * @param item item
+     * @return new itemstack
+     */
     public static ItemStack setLore(List<String> lore, ItemStack item){
         ItemMeta meta = item.getItemMeta();
         meta.setLore(lore);
@@ -219,6 +237,13 @@ public class InvUtils {
         return item;
     }
 
+    /**
+     * Creates an itemstack with a custom name and nbt tags
+     * @param mat material the itemstack is
+     * @param name the name of itemstack
+     * @param nbt any nbt data the itemstack will have
+     * @return a new itemstack
+     */
     public static ItemStack createItem(Material mat, String name, String... nbt){
 
         ItemStack item = new ItemStack(mat, 1);

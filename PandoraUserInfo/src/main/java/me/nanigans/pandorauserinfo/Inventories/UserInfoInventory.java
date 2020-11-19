@@ -24,6 +24,8 @@ public class UserInfoInventory implements Listener {
     private ItemStack lastClicked;
     private short punishmentPage = 1;
     private UserInfoActions.Filter filterBy = UserInfoActions.Filter.NONE;
+    private boolean inOtherInventory = false;
+    private boolean inOtherEChest = false;
 
 
     public UserInfoInventory(Player looking, OfflinePlayer whosInfo){
@@ -41,11 +43,19 @@ public class UserInfoInventory implements Listener {
 
     }
 
+    /**
+     * Checks when a player clicks an item in this inventory
+     * @param event invclick event
+     * @throws NoSuchMethodException error
+     * @throws InvocationTargetException error
+     * @throws IllegalAccessException error
+     */
     @EventHandler
     public void onInvClick(InventoryClickEvent event) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
 
         if(event.getInventory() != null && event.getClickedInventory() != null) {
             if (event.getInventory().equals(this.inv)) {
+                if(!this.inOtherInventory && !this.inOtherEChest)
                 event.setCancelled(true);
 
                 ((Player) event.getWhoClicked()).playSound(this.staff.getLocation(), Sound.valueOf("CLICK"), 2f, 1f);
@@ -76,6 +86,13 @@ public class UserInfoInventory implements Listener {
 
     }
 
+    /**
+     * When player closes inventory, it'll cancel this event handler.
+     * It'll check if player is editing offline inventory and save it when staff closes it
+     * @param event inventoryclose event
+     * @throws Throwable error
+     */
+
     @EventHandler
     public void onInvClose(InventoryCloseEvent event) throws Throwable {
         if(event.getInventory().equals(this.inv)){
@@ -86,6 +103,14 @@ public class UserInfoInventory implements Listener {
                 this.finalize();
             }
 
+            if(this.inOtherInventory){
+
+                ActionUtils.saveOfflineInventory(this, event.getInventory());
+
+            }
+            if(this.inOtherEChest){
+                ActionUtils.saveOfflineEnderChest(this, event.getInventory());
+            }
         }
     }
 
@@ -97,6 +122,15 @@ public class UserInfoInventory implements Listener {
     }
 
 
+
+
+    public void setInOtherInventory(boolean inOtherInventory) {
+        this.inOtherInventory = inOtherInventory;
+    }
+
+    public void setInOtherEChest(boolean inOtherEChest) {
+        this.inOtherEChest = inOtherEChest;
+    }
 
     public UserInfoActions.Filter getFilterBy() {
         return filterBy;

@@ -4,9 +4,52 @@ main: me.nanigans.pandorauserinfo.PandoraUserInfo
 authors: [ProNanigans]
 description: User information for pandora pvp
 website: www.dustie.xyz
-depends: [LiteBans, Vault, Factions]
+depends: [LiteBans, PlayerVaults, Factions, Matrix_Report, PandoraHomaPlugin]
 commands:
   userinfo:
     description: "Shows information on a user"
     usage: /userinfo <name>
     aliases: [whois, infouser, ui]
+permissions:
+  UserInfo.PerformCommand:
+    description: "Allows the user of the /userinfo command"
+    default: op
+  UserInfo.*:
+    description: "All of these permissions into one except PerformCommand"
+    default: op
+  UserInfo.ViewOfflineInventory:
+    description: "Allow player to view offline inventory of another player. Online is handled by /echest"
+    default: op
+  UserInfo.ViewOfflineEChest:
+    description: "Allow player to view offline echest of another player. Online is handled by /invsee"
+    default: op
+  UserInfo.FactionVault:
+    description: "Allow player to tp to faction vault"
+    defult: op
+  UserInfo.PlayerVault:
+    description: "Allow player to view other player vault"
+    default: op
+  UserInfo.ViewWarns:
+    description: "Allow player to view all players warns"
+    default: op
+  UserInfo.ViewMutes:
+    description: "Allow player to view all players mutes"
+    default: op
+  UserInfo.ViewReports:
+    description: "Allow player to view all player reports"
+    default: op
+  UserInfo.ViewBans:
+    description: "Allow player to view all player bans"
+    default: op
+  UserInfo.ViewKicks:
+    description: "Allow player to view all player kicks"
+    default: op
+  UserInfo.Homes:
+    description: "Allow player to view all player homes"
+    default: op
+  UserInfo.Warps:
+    description: "Allow player to view all faction warps"
+    default: op
+  UserInfo.FactionHomes:
+    description: "Allow player to view all faction homes"
+    default: op
